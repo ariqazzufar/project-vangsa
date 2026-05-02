@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VANGSA | Modern Batik Dynasty</title>
+    
+    <!-- Favicon Vangsa -->
+    <link rel="icon" type="image/png" href="assets/image/android-chrome-512x512.png">
+    <link rel="apple-touch-icon" href="assets/image/apple-touch-icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vangsa: { black: '#050505', gold: '#D4AF37', gray: '#121212', accent: '#1a1a1a' }
+                    },
+                    fontFamily: { serif: ['Playfair Display', 'serif'], sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #050505; color: #f9f9f9; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        
+        /* Animasi Outline ala 21st.dev */
+        .outline-card {
+            position: relative;
+            border-radius: 12px;
+            background: #121212;
+            overflow: hidden;
+        }
+        .outline-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: conic-gradient(from 0deg, transparent, #D4AF37, transparent 30%);
+            animation: rotate 4s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .outline-card:hover::before { opacity: 1; }
+        .outline-card::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            background: #121212;
+            border-radius: 11px;
+            z-index: 0;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .card-content { position: relative; z-index: 10; }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- Navigasi -->
+    <nav class="fixed w-full z-50 bg-vangsa-black/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-8 h-20 flex justify-between items-center">
+            <h1 class="font-serif text-2xl font-bold tracking-widest uppercase cursor-pointer">Vangsa<span class="text-vangsa-gold">.</span></h1>
+            <div class="flex items-center space-x-8 text-[10px] tracking-[0.3em] font-semibold uppercase text-white/60">
+                <a href="https://wa.me/6288991906922" target="_blank" rel="noopener" class="hover:text-vangsa-gold transition-all">Contact</a>
+                <button onclick="toggleCart()" class="hover:text-vangsa-gold transition-all relative">
+                    Bag (<span id="cart-count">0</span>)
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="h-[80vh] flex items-center justify-center relative overflow-hidden text-center">
+        <div class="absolute inset-0 bg-vangsa-black/40 z-10"></div>
+        <img src="https://i.pinimg.com/736x/6e/a6/df/6ea6dfeb364cd3be14994ed5a6a339fb.jpg" class="absolute inset-0 w-full h-full object-cover grayscale-[40%]" alt="Vangsa Hero">
+        <div class="relative z-20 px-4">
+            <h2 class="font-serif text-6xl md:text-8xl mb-4 tracking-tighter opacity-90 uppercase">The New Era</h2>
+            <p class="text-vangsa-gold tracking-[0.5em] text-xs uppercase italic">Authority in every thread</p>
+        </div>
+    </section>
+
+    <!-- Product Collections -->
+    <section id="collections" class="py-32 max-w-7xl mx-auto px-8">
+        <div class="mb-20 flex items-center space-x-4">
+            <div class="h-[1px] w-12 bg-vangsa-gold"></div>
+            <h3 class="font-serif text-3xl italic tracking-wide">The Collection</h3>
+        </div>
+        
+        <div id="product-container" class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+            <p class="text-vangsa-gold text-xs italic tracking-widest opacity-40 col-span-full uppercase">Connecting to the dynasty...</p>
+        </div>
+    </section>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-panel" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="toggleCart()"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-[#080808] border-l border-white/5 p-10 flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="font-serif text-2xl italic font-bold uppercase tracking-widest">Shopping Bag</h2>
+                <button onclick="toggleCart()" class="text-[10px] tracking-widest hover:text-vangsa-gold transition-colors font-bold">CLOSE</button>
+            </div>
+            <div id="cart-items" class="flex-1 space-y-6 overflow-y-auto pr-4">
+                <p id="empty-msg" class="text-white/20 italic text-sm">Your bag is currently empty.</p>
+                <ul id="cart-list" class="space-y-6"></ul>
+            </div>
+            <div class="mt-10 pt-10 border-t border-white/5">
+                <div class="flex justify-between items-end mb-8">
+                    <span class="text-[10px] tracking-widest text-white/40 uppercase font-bold">Total Estimate</span>
+                    <span id="cart-total" class="text-2xl font-serif text-vangsa-gold">Rp 0</span>
+                </div>
+                <button onclick="processCheckout()" class="w-full bg-vangsa-gold py-5 text-vangsa-black text-[11px] font-bold tracking-[0.3em] uppercase hover:bg-white transition-all duration-500 rounded-sm shadow-lg">
+                    Checkout Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal (QRIS) -->
+    <div id="payment-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl" onclick="closePayment()"></div>
+        <div class="relative bg-white text-black p-10 max-w-sm w-full text-center rounded-2xl shadow-2xl border-2 border-vangsa-gold">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" class="h-6 mx-auto mb-8 opacity-80" alt="QRIS">
+            <div id="qris-container" class="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-100 flex justify-center shadow-inner">
+                <!-- QR Generated here -->
+            </div>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Payable Amount</p>
+            <div id="final-price" class="text-3xl font-serif font-bold mb-8 text-black">Rp 0</div>
+            
+            <div class="text-left bg-gray-50 p-4 rounded-xl border border-gray-100 mb-8">
+                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Direct Bank (BCA)</p>
+                <p class="text-lg font-bold tracking-tight">532 511 5928</p>
+                <p class="text-[9px] text-gray-500 uppercase italic font-semibold">a.n M Ariq Az Zufar N</p>
+            </div>
+
+            <button onclick="finishPayment()" class="w-full bg-black text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-green-600 transition-all shadow-lg">
+                I've Made Payment
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function toggleCart() { document.getElementById('cart-panel').classList.toggle('hidden'); }
+        function closePayment() { document.getElementById('payment-modal').classList.add('hidden'); }
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch('http://localhost:5000/api/products');
+                const products = await response.json();
+                const container = document.getElementById('product-container');
+                container.innerHTML = ''; 
+
+                products.forEach(product => {
+                    container.innerHTML += `
+                        <div class="outline-card group">
+                            <div class="card-content p-1 bg-vangsa-gray h-full flex flex-col">
+                                <div class="overflow-hidden bg-black aspect-[3/4]">
+                                    <img src="${product.image}" class="w-full h-full object-cover transition-all duration-[1.5s] group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                                </div>
+                                <div class="p-8 text-left flex-1 flex flex-col">
+                                    <h2 class="font-serif text-xl font-bold uppercase tracking-widest text-vangsa-gold">${product.name}</h2>
+                                    <p class="text-[10px] text-white/40 mt-4 leading-relaxed uppercase tracking-widest flex-1 italic">${product.desc}</p>
+                                    <div class="mt-8 pt-8 border-t border-white/5 flex justify-between items-center">
+                                        <span class="font-serif text-lg">Rp ${product.price.toLocaleString()}</span>
+                                        <button onclick="addToCart('${product.name}', ${product.price})" class="text-[9px] font-bold tracking-[0.2em] uppercase text-white/60 hover:text-vangsa-gold transition-colors">
+                                            Add To Bag +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                document.getElementById('product-container').innerHTML = `<p class="text-vangsa-gold text-xs italic tracking-widest opacity-40 uppercase col-span-full">Database unreachable. Ensure backend is active.</p>`;
+            }
+        }
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = document.getElementById('cart-count');
+            const list = document.getElementById('cart-list');
+            const total = document.getElementById('cart-total');
+            const msg = document.getElementById('empty-msg');
+            
+            count.innerText = cart.length;
+            msg.style.display = cart.length > 0 ? 'none' : 'block';
+            
+            list.innerHTML = cart.map(item => `
+                <li class="flex justify-between items-end border-b border-white/5 pb-4">
+                    <div class="text-[10px] uppercase font-bold tracking-widest">${item.name}</div>
+                    <div class="font-serif text-vangsa-gold font-bold">Rp ${item.price.toLocaleString()}</div>
+                </li>
+            `).join('');
+
+            const sum = cart.reduce((s, i) => s + i.price, 0);
+            total.innerText = `Rp ${sum.toLocaleString()}`;
+        }
+
+        function processCheckout() {
+            if (cart.length === 0) return;
+            const sum = cart.reduce((s, i) => s + i.price, 0);
+            toggleCart();
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('final-price').innerText = `Rp ${sum.toLocaleString()}`;
+            
+            // Generate QR Universal (BCA/DANA/GoPay compatible)
+            const qrData = `VANGSA_PAY_BCA_5325115928_ID_${Date.now()}_AMOUNT_${sum}`;
+            document.getElementById('qris-container').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrData}" class="rounded-lg shadow-sm">`;
+        }
+
+        function finishPayment() {
+            const sum = cart.reduce((s, i) => s + i.price, 0);
+            let items = cart.map((it, i) => `${i+1}. ${it.name} (Rp ${it.price.toLocaleString()})`).join("%0A");
+            const waMsg = `Halo Vangsa! Saya sudah mentransfer *Rp ${sum.toLocaleString()}* untuk order:%0A%0A${items}%0A%0AMohon verifikasi ya!`;
+            window.open(`https://wa.me/6288991906922?text=${waMsg}`, '_blank');
+            cart = []; 
+            updateCartUI(); 
+            closePayment();
+        }
+
+        fetchProducts();
+    </script>
+</body>
+</html>
