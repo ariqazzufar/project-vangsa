@@ -154,6 +154,12 @@
         function toggleCart() { document.getElementById('cart-panel').classList.toggle('hidden'); }
         function closePayment() { document.getElementById('payment-modal').classList.add('hidden'); }
 
+        // Fungsi baru untuk generate kode unik
+        function generateOrderCode() {
+            const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+            return `VNG-${randomStr}`;
+        }
+
         async function fetchProducts() {
             try {
                 const response = await fetch('/api/products');
@@ -226,8 +232,12 @@
 
         function finishPayment() {
             const sum = cart.reduce((s, i) => s + i.price, 0);
+            const orderCode = generateOrderCode(); // Generate kode unik
             let items = cart.map((it, i) => `${i+1}. ${it.name} (Rp ${it.price.toLocaleString()})`).join("%0A");
-            const waMsg = `Halo Vangsa! Saya sudah mentransfer *Rp ${sum.toLocaleString()}* untuk order:%0A%0A${items}%0A%0AMohon verifikasi ya!`;
+            
+            // Rangkai pesan WhatsApp dengan kode unik
+            const waMsg = `Halo CS Vangsa! Saya sudah mentransfer pembayaran.%0A%0A*KODE ORDER:* ${orderCode}%0A*Total Transfer:* Rp ${sum.toLocaleString()}%0A%0A*Detail Pesanan:*%0A${items}%0A%0ABerikut saya lampirkan bukti transfernya. Mohon segera diverifikasi ya!`;
+            
             window.open(`https://wa.me/6288991906922?text=${waMsg}`, '_blank');
             cart = []; 
             updateCartUI(); 
